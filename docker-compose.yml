@@ -2,47 +2,33 @@ version: '3.8'
 
 services:
   mysqldb:
-    image: mysql:8.0
-    container_name: mysql-db
-    restart: unless-stopped
+    image: mysql:8.0  # Utilisation de l'image officielle MySQL 8.0
+    restart: unless-stopped  # Redémarre le conteneur sauf s'il est arrêté manuellement
     environment:
-      MYSQL_ROOT_PASSWORD: mariem  # Remplacez par un mot de passe sécurisé
-      MYSQL_DATABASE: db          # Nom de la base de données
+      MYSQL_ROOT_PASSWORD: mariem # Mot de passe pour l'utilisateur root
+      MYSQL_DATABASE: db          # Création d'une base de données nommée 'db'
     ports:
-      - "3306:3306"
-    command: >
-      --default-authentication-plugin=mysql_native_password
-      --skip-host-cache
-      --host_cache_size=0
+      - "3306:3306"  # Le port 3306 exposé pour la connexion à MySQL
     volumes:
-      - db_data:/var/lib/mysql          # Volume persistant pour MySQL
-      - /usr/share/zoneinfo:/usr/share/zoneinfo:ro  # Fixe les fuseaux horaires
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      - db:/var/lib/mysql  # Volume persistant pour les données de MySQL
 
-  app-events:
+  app-tpfoyer:
     depends_on:
-      - mysqldb
-    image: djelassimariem/event:latest  # Remplacez par le nom correct de l'image Docker
-    container_name: app-events
-    restart: on-failure
+      - mysqldb  # L'application dépend du service MySQL
+    image: djelassimariem/event:latest  # Image de votre application Spring Boot
+    restart: on-failure  # Redémarre le conteneur en cas d'échec
     ports:
-      - "8089:8089"  # Port exposé pour l'application Spring Boot
+      - "8089:8089"  # Le port 8089 exposé pour accéder à l'application
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:mysql://mysqldb:3306/db?createDatabaseIfNotExist=true"
-      SPRING_DATASOURCE_USERNAME: "root"
-      SPRING_DATASOURCE_PASSWORD: "mariem"
-      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
-    stdin_open: true
-    tty: true
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      SPRING_APPLICATION_JSON:
+          '{
+          "spring.datasource.url": "jdbc:mysql://mysqldb:3306/db?createDatabaseIfNotExist=true",  
+          "spring.datasource.username": "root",  
+          "spring.datasource.password": "mariem",  
+            "spring.jpa.hibernate.ddl-auto": "update"  
+      }'
+    stdin_open: true  # Permet d'ouvrir une session interactive (utile pour certains cas de test)
+    tty: true  # Alloue un pseudo-terminal pour les interactions
 
 volumes:
-  db_data:
+  db:  # Déclaration du volume pour persister les données MySQL
