@@ -11,10 +11,17 @@ services:
     ports:
       - "3306:3306"
     command: >
-      --default-authentication-plugin=caching_sha2_password
+      --default-authentication-plugin=mysql_native_password
+      --skip-host-cache
+      --host_cache_size=0
     volumes:
       - db_data:/var/lib/mysql          # Volume persistant pour MySQL
       - /usr/share/zoneinfo:/usr/share/zoneinfo:ro  # Fixe les fuseaux horaires
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   app-events:
     depends_on:
