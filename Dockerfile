@@ -1,11 +1,11 @@
-# Utiliser une image légère OpenJDK basée sur Alpine Linux
+# Use a lightweight OpenJDK image based on Alpine Linux
 FROM openjdk:17-jdk-alpine
 
-# Exposer le port sur lequel l'application Spring Boot sera disponible
+# Expose the port that the Spring Boot application will be available on
 EXPOSE 8089
 
-# Ajouter votre fichier JAR généré dans le conteneur
-COPY target/eventsProject-1.O.O.jar /eventsProject-1.O.O.jar
+# Copy the generated .jar file to the container (use wildcard to match any .jar in target directory)
+COPY target/*.jar /app.jar
 
-# Définir le point d'entrée pour exécuter l'application avec Java
-ENTRYPOINT ["java", "-jar", "/eventsProject-1.O.O.jar"]
+# Set the entry point to run the Spring Boot application with Java
+ENTRYPOINT ["java", "-jar", "/app.jar"]
